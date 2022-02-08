@@ -1,39 +1,39 @@
-package scala.CS474
+package scala
 
-import scala.collection.mutable
+import collection.mutable
 
-object SetOperations :
-  type BasicType= Any
-  private var bindingScope: mutable.Map[String, BasicType] = collection.mutable.Map[String, BasicType]()
-  private var macroMap: mutable.Map[String, SetOper] = collection.mutable.Map[String, SetOper]()
-  private var scopeMap: mutable.Map[String, Map[String, BasicType]] = collection.mutable.Map[String, Map[String, BasicType]]()
+object SetOperations:
+  type BasicType = Any
+  private val bindingScope: mutable.Map[String, BasicType] = collection.mutable.Map[String, BasicType]()
+  private val macroMap: mutable.Map[String, SetOper] = collection.mutable.Map[String, SetOper]()
+  private val scopeMap: mutable.Map[String, mutable.Map[String, BasicType]] = collection.mutable.Map[String, mutable.Map[String, BasicType]]()
 
   enum SetOper:
     case Value(input: BasicType)
     case Variable(name: String)
     case Insert(setname: Variable, objectList: List[SetOper])
     case Delete(setName: Variable, obj: SetOper)
-    case Check(setName: Variable, obj:SetOper)
-    case Union(setA:SetOper, setB:SetOper)
-    case Intersection(setA:SetOper, setB:SetOper)
-    case Difference(setA:SetOper, setB:SetOper)
-    case Symm_Difference(setA:SetOper, setB:SetOper)
-    case Cartesian_Product(setA:SetOper, setB:SetOper)
+    case Check(setName: Variable, obj: SetOper)
+    case Union(setA: SetOper, setB: SetOper)
+    case Intersection(setA: SetOper, setB: SetOper)
+    case Difference(setA: SetOper, setB: SetOper)
+    case Symm_Difference(setA: SetOper, setB: SetOper)
+    case Cartesian_Product(setA: SetOper, setB: SetOper)
     case Macro(mName: String, operation: SetOper)
     case MacroEval(mName: String)
-    case Scope(sName: String, oper:SetOper)
+    case Scope(sName: String, oper: SetOper)
 
 
     def eval: BasicType = {
       this match {
         case Value(i) => i
-        case Variable(name) => bindingScope.getOrElse(name,None)
+        case Variable(name) => bindingScope.getOrElse(name, None)
 
         case Insert(setname, objectList) => println("Inserting")
-          setname match{
+          setname match {
             case Variable(name) => setname.eval match {
               case None =>
-                var setObj: mutable.Set[BasicType] = mutable.Set[BasicType]()
+                val setObj: mutable.Set[BasicType] = mutable.Set[BasicType]()
                 for (obj <- objectList) {
                   setObj += obj.eval
                 }
@@ -49,7 +49,7 @@ object SetOperations :
 
         case Delete(setname: Variable, obj: SetOper) =>
           println("Deleting")
-          setname match{
+          setname match {
             case Variable(name) => setname.eval match {
               case None => "No Such set variable defined"
               case setObj: mutable.Set[BasicType] =>
@@ -111,9 +111,9 @@ object SetOperations :
           }
 
         case Symm_Difference(setA, setB) => println("Symmetric Difference")
-         val diff1 = Difference(setA, setB)
-         val diff2 = Difference(setB, setA)
-         Union(diff1,diff2).eval
+          val diff1 = Difference(setA, setB)
+          val diff2 = Difference(setB, setA)
+          Union(diff1, diff2).eval
 
         case Cartesian_Product(setA, setB) => println("Cartesian Product")
           setA.eval match {
@@ -135,11 +135,14 @@ object SetOperations :
           macroMap(name) = operation
 
         case MacroEval(name) => println("Substituting Macro")
-          val x :SetOper = macroMap.getOrElse(name, null)
-          if x!=null then
+          val x: SetOper = macroMap.getOrElse(name, null)
+          if x != null then
             x.eval
           else x
+
+        case Scope(sName, oper) => println("Scope:"+sName)
+          scopeMap(sName)=bindingScope
+
       }
 
     }
-  
