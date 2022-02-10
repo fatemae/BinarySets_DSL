@@ -11,6 +11,7 @@ A language for users of Set Theory to create and evaluate binary operations on s
 ## Implementation
 1. Implemented Binary Set Theory operations embedded in scala language. The Set Operations implemented include Insert, Delete, Union, Intersection, Difference, Symmetric Difference, Cartesian Product.
 2. Implemented Macros to reuse an expression
+3. Implemented Scoping rules
 
 ## Binary Set Expressions
 Always call eval function on the expression to run it<br>
@@ -43,3 +44,14 @@ Always call eval function on the expression to run it<br>
    To perform Cartesian Product of two sets. It returns the result of the product <br>
    `val op = Cartesian_Product(Variable("setnameA") , Variable("setnameB"))` <br>
 
+8. Macro<br>
+   Creates a Macro for an set operation.<br>
+   `val op = Macro("someName", Delete(Variable("B"), Value("set")))`
+
+9. MacroEval<br>
+   To evaluate any already created Macro<br>
+   `MacroEval("someName").eval`
+
+10. Scope<br>
+   To create a scope <br>
+   `Scope("scopename", Scope("othername", Insert(Variable("someSetName"), List(Value("var"), Value(1), Value("somestring"))))).eval`
