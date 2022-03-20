@@ -40,7 +40,7 @@ class ClassOperationsTest extends AnyFlatSpec with Matchers{
     assert(op.eval() == collection.mutable.HashSet(1,"34", 2, 1234,"set"))
   }
 
-  it should "result in inheritence of ClassB to ClassC" in {
+  it should "result in inheritance of ClassB to ClassC" in {
     ClassDef("ClassC",
       Field("a"),
       Field("setx"),

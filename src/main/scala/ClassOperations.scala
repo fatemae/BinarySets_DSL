@@ -24,7 +24,6 @@ object ClassOperations :
     case InvokeMethod(variable: Object, mName: String, params: Parameters)
     case AbstractClassDef(cName: String, classOper: ClassOper*)
     case AbstractMethod(mName:String, params:Parameters)
-    case OverriddenMethod(mName: String, params: Parameters, opers: SetOper*)
     case Implements(interface: String)
     case InterfaceDef(name: String , interfaceOper: ClassOper*)
 
@@ -291,7 +290,7 @@ object ClassOperations :
     private def setParent(className :String, parentName:String): Unit = {
       bindingScope.getOrElse(className, null) match {
         case classDetails: mutable.Map[String, Any] => classDetails.getOrElse(parentClass, null) match {
-          case parent:String => throw Exception("Multiple Inheritence not supported.")
+          case parent:String => throw Exception("Multiple Inheritance not supported.")
           case _ => classDetails(parentClass)=parentName
         }
         case null =>
@@ -587,22 +586,17 @@ object ClassOperations :
           } else {
               variable match {
                 case Variable(v) =>
-                  if(staticType.equals(dynamicType)) {
-                    val classTemp = cloneClassMap(bindingScope.getOrElse(staticType, null))
-                    objectMap.getOrElse(scopeNm, None) match {
-                      //put static and dynamic type
-                      case map: collection.mutable.Map[String, Any] => map(v) = classTemp
-                      case None => objectMap(scopeNm) = mutable.Map[String, Any](v -> classTemp)
-                    }
-                    runMethod(scopeNm, v, staticType, params)
-                  }else {
-                    val classTemp = cloneInheritedClassMap(staticType, dynamicType, bindingScope.getOrElse(staticType, null), bindingScope.getOrElse(dynamicType, null))
-                    objectMap.getOrElse(scopeNm, None) match {
-                      case map: collection.mutable.Map[String, Any] => map(v) = classTemp
-                      case None => objectMap(scopeNm) = mutable.Map[String, Any](v -> classTemp)
-                    }
-                    runMethod(scopeNm, v, dynamicType, params)
+
+                  val classTemp = if(staticType.equals(dynamicType))
+                    cloneClassMap(bindingScope.getOrElse(staticType, null))
+                  else cloneInheritedClassMap(staticType, dynamicType, bindingScope.getOrElse(staticType, null), bindingScope.getOrElse(dynamicType, null))
+
+                  objectMap.getOrElse(scopeNm, None) match {
+                    //put static and dynamic type
+                    case map: collection.mutable.Map[String, Any] => map(v) = classTemp
+                    case None => objectMap(scopeNm) = mutable.Map[String, Any](v -> classTemp)
                   }
+                  runMethod(scopeNm, v, staticType, params)
                 case _ =>
               }
           }
@@ -637,7 +631,6 @@ object ClassOperations :
             throw Exception("Only abstract class or Interface can have abstract methods")
           }
 
-        case OverriddenMethod(mName: String, params: Parameters, opers: _*) =>
 
 
         case Implements(interface: String)=>
