@@ -294,9 +294,9 @@ object ClassOperations :
                 case _ =>
               }
             }
-          case _ => false
+          case _ =>
         }
-        case _ => false
+        case _ =>
       }
       false
     }
