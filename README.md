@@ -2,7 +2,7 @@
 Fatema Engineeringwala - 675589901
 
 ## Brief Project Description
-A language for users of Set Theory to create and evaluate binary operations on sets along with inheritance
+A language for users of Set Theory to create and evaluate binary operations on sets along with classes, abstract classes , interfaces and its inheritance.
 
 ## Instructions on Running Code
 `sbt compile` used to compile the code<br>
