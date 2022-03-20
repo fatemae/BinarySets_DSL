@@ -23,6 +23,7 @@ A language for users of Set Theory to create and evaluate binary operations on s
 11. Abstract Methods
 12. Interfaces
 13. implementation of Interfaces
+14. Nesting of interfaces and abstract classes
 
 
 ## Classes and Inheritance datatypes

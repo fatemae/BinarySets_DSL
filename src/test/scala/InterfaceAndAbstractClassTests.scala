@@ -15,6 +15,10 @@ class InterfaceAndAbstractClassTests extends AnyFlatSpec with Matchers{
     assertThrows[Exception]("Only abstract class or Interface can have abstract methods",op.eval())
   }
 
+  it should "should result in Exception aa abstract class definition doesn't have any abstract method" in {
+    val op = AbstractClassDef("NewAbstract", Field("abc"))
+    assertThrows[Exception]("Abstract Class doesn't have any abstract methods",op.eval())
+  }
 
   it should "should result in creating a abstract class definition with a field and abstract method" in {
     AbstractClassDef("NewAbstract",
@@ -63,7 +67,7 @@ class InterfaceAndAbstractClassTests extends AnyFlatSpec with Matchers{
   }
 
   it should "should result in Exception if class extends more than one class" in {
-    val op = AbstractClassDef("newB",  EXTENDS("A"), EXTENDS("B"))
+    val op = AbstractClassDef("newB", AbstractMethod("method3", Parameters(null)), EXTENDS("A"), EXTENDS("B"))
 
     assertThrows[Exception]("Cannot extend more than one class/interface",op.eval())
   }

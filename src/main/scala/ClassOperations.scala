@@ -282,6 +282,25 @@ object ClassOperations :
       }
     }
 
+    def hasAtleastOneAbstractMethod(name: String): Boolean = {
+      bindingScope.getOrElse(name, null) match {
+        case classDetails: mutable.Map[String, Any] => classDetails.getOrElse(method, null) match {
+          case methods: mutable.Map[String, Any] =>
+            for((mName: String, mDetails: mutable.Map[String, Any])<-methods){
+              mDetails.getOrElse(typeModifier, null) match {
+                case str:String => if(str.equals(abstractType)){
+                  return true
+                }
+                case _ =>
+              }
+            }
+          case _ => false
+        }
+        case _ => false
+      }
+      false
+    }
+
     /**
      * @param className: String - name of a class
      * @param parentName: String - parent class name
@@ -617,6 +636,10 @@ object ClassOperations :
 
         case AbstractClassDef(cName: String, classOper: _*) =>
           defineClass(cName, abstractType, className+connector+cName, classOper)
+          if(!hasAtleastOneAbstractMethod(cName)){
+            bindingScope.remove(cName)
+            throw Exception("Abstract Class doesn't have any abstract methods.")
+          }
 
 
         case AbstractMethod(mName:String, params:Parameters) =>
