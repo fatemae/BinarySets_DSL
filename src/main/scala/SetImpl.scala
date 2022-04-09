@@ -68,9 +68,46 @@ object SetImpl:
 //        InterfaceDef("newIntr1", AbstractMethod("m1", Parameters(null)), EXTENDS("newIntr")).eval()
 //        ClassDef("X", Implements("newIntr1")).eval()
 
-        InterfaceDef("newIntr", AbstractMethod("m1", Parameters(null))).eval()
-        InterfaceDef("newIntr1", AbstractMethod("m1", Parameters(null)), EXTENDS("newIntr")).eval()
-        ClassDef("X", Method("m1", Parameters(null), Insert(Variable("x"), List(Value(3)))), Implements("newIntr1")).eval()
-        NewObject("newIntr", "X", Variable("var"), Parameters(null)).eval()
-        println(Object("var").eval())
+//        InterfaceDef("newIntr", AbstractMethod("m1", Parameters(null))).eval()
+//        InterfaceDef("newIntr1", AbstractMethod("m1", Parameters(null)), EXTENDS("newIntr")).eval()
+//        ClassDef("X", Method("m1", Parameters(null), Insert(Variable("x"), List(Value(3)))), Implements("newIntr1")).eval()
+//        NewObject("newIntr", "X", Variable("var"), Parameters(null)).eval()
+//        println(Object("var").eval())
+
+//          Scope("IfElseTestScope", Insert(Variable("someSet"), List(Value("var"), Value(1), Value("somestring")))).eval()
+//          Scope("IfElseTestScope", IfThenElse(Check(Variable("someSet"), Value("var")),
+//            List(Insert(Variable("someSet"), List(Value(10)))), List(Insert(Variable("someSet"), List(Value(15)))))).eval()
+//          println(SetOperations.bindingScope)
+
+//          Scope("IfElseTestScope", Insert(Variable("someSet"), List(Value("var"), Value(1), Value("somestring")))).eval()
+//          Scope("IfElseTestScope", IfThenElse(Check(Variable("someSet"), Value("var1")),
+//            List(Insert(Variable("someSet"), List(Value(10)))), List(Insert(Variable("someSet"), List(Value(15)))))).eval()
+//          println(SetOperations.bindingScope)
+
+    ExceptionClassDef("someExceptonClassName", Field("Reason"),
+      Constructor(Parameters(collection.mutable.Map("r"->null)), Assign("Reason", Variable("r"))),
+      Method("printReason", Parameters(null), PrintField("Reason"))).eval()
+    ExceptionClassDef("someExceptonClassName1", Field("Reason"),
+      Constructor(Parameters(collection.mutable.Map("r"->null)), Assign("Reason", Variable("r"))),
+      Method("printReason", Parameters(null), PrintField("Reason"))).eval()
+    //this example shows how users use branching and exception constructs
+    Scope("scopenamemulticatch", TryCatch(
+      List(
+        Insert(Variable("someSet"), List(Value("var"), Value(1), Value("somestring"))),
+        IfThenElse(Check(Variable("someSet"), Value(1)),
+          List(
+            NewObject("someExceptonClassName", "someExceptonClassName", Variable("e"),
+              Parameters(collection.mutable.Map("r"->"No value found"))),
+            NewObject("someExceptonClassName1", "someExceptonClassName1", Variable("a"),
+              Parameters(collection.mutable.Map("r"->"No value found"))),
+            ThrowException("someExceptonClassName", ObjectType("e")),
+            Insert(Variable("var1"), List(Value(1)))),
+          List(Insert(Variable("var2"), List(Value(3))))),
+        Insert(Variable("var3"), List(Value(3)))),
+      //and this parameter is the catch code block
+      //the variable "storageOfException" is bound to the exception class someExceptonClassName
+      //and the value of its field, Reason is retrieved and stored in a set bound to the variable var.
+      List(CatchException(ObjectType("a"), Insert(Variable("var4"), List(Value(3)))),
+        CatchException(ObjectType("e"), Insert(Variable("var5"), List(Value(3))))))).eval()
+
 

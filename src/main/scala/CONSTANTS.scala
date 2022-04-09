@@ -3,6 +3,7 @@ object CONSTANTS {
   val typeModifier = "<type>"
   val abstractType = "<abstract>"
   val interfaceType = "<interface>"
+  val exceptionType = "<exception>"
   val overriddenType = "<overriden>"
   val parentClass = "<parentClass>"
   val implementsClass = "<implements>"
