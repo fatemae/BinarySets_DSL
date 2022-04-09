@@ -1,8 +1,8 @@
-# BinarySets-withAbstractClassesAndInterfaces-CS474
+# BinarySetsDSL-(Classes+Abstraction+Inheritence+scoping+controlStructure+ExceptionHandling)-CS474
 Fatema Engineeringwala - 675589901
 
 ## Brief Project Description
-A language for users of Set Theory to create and evaluate binary operations on sets along with classes, abstract classes , interfaces and its inheritance.
+A language for users of Set Theory to create and evaluate binary operations on sets along with classes, abstract classes , interfaces and its inheritance. This language also includes if-then-else control structure and exception handling where user can throw an exception and handle it in try-catch block. 
 
 ## Instructions on Running Code
 `sbt compile` used to compile the code<br>
@@ -33,33 +33,44 @@ A language for users of Set Theory to create and evaluate binary operations on s
 1. ClassDef<br>
    It will be used for defining a class, its methods and variables etc. It takes one mandatory String value that is className and any number of class datatypes like ClassDef(for nested classes), Field, Constructor, Method, and EXTENDS which are described below.<br>
    `ClassDef("A", Field("a"), Constructor(Parameters(null),Assign("a", Value(2))))` . This will create a class A with field 'a' and a constructor with no parameters.<br>
+
 2. Field<br>
    This datatype are used inside ClassDef to define class fields. It takes just one string value for field name <br>
+
 3. Constructor<br>
    This datatype is used in classdef to define class constructor. It takes one mandatory value of datatype Parameters and any number SetExpressions as its body.<br>
+
 4. Methods<br>
    This datatype is used in classdef to define class methods. It takes a string method name, a Parameter datatype to define methods input params and any number of setExpressions as its body. The last line of the body will be used as the return value of the function.<br>
    `Method("newMethod", Parameters(collection.mutable.Map("x"->None, "y"->None)), Insert(Variable("setZ"), List(Variable("x"), Variable("y"))),Union(Variable("setX"), Variable("setZ")))`
+
 5. Parameters<br>
    Used in constructors and methods to define its params. It takes a Map of key value pairs as input.<br>
+
 6. EXTENDS<br>
    Used in ClassDef to declare inheritance. It takes one class name string value to define the class that it extends, given the class is already defined before extending it. EXTENDS should be used as the last field of classDef so that it can read through aal the defined methods and fields to make sure that parents classes abstract methods are overridden or not.<br>
    `ClassDef("A", EXTENDS("B"))` means class A extends class B. <br>
+
 7. ObjectType<br>
    Used to access a Object created using NewObject. It takes string type of object name.<br>
    `ObjectType("newObj")`
+
 8. AbstractClassDef<br>
    Used to define an Abstract Class. It has one mandatory string field to define Class name, it can take in any methods, fields or constructor declaration. It can also nest another Abstract class, class or interface.<br>
    `AbstractClassDef("C", AbstractMethod("method3", Parameters(null)), Method("method2", Parameters(null), null), EXTENDS("B"))`
+
 9. AbstractMethod<br>
    Used to define an Abstract Method i.e. a method without its implementation details. It can be encapsulated in any abstract class or Interface. It takes mandatory methodname and Parameter type value.<br>
    `AbstractMethod("method1", Parameters(null))`
+
 10. InterfaceDef<br>
     Used to define an Interface Class, a class which has only abstract methods, no constructor and cannot have its own object created. It take string field of interface name and any number of abstract methods and fields.<br>
     `InterfaceDef("newIntr", AbstractMethod("m1", Parameters(null)))`
+
 11. Implements(interface: String)<br>
     Used in an abstract or non-abstract class to define which interface it implements. It takes one string value of interface name. Implements should be the last field in class def or a field after all method and field declarations to ensure that class has already overriden abstract parent methods.<br>
     `ClassDef("X", Method("m1", Parameters(null), Insert(Variable("x"), List(Value(3)))), Implements("newIntr1"))`
+
 12. ExceptionClassDef<br>
     Used to define an Exception class. Similar to other class def . First param is a string classname followed by any number of methods, fields . <br>
     `ExceptionClassDef("someExceptonClassName", Field("Reason"),
