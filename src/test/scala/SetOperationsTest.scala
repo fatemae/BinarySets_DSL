@@ -7,7 +7,6 @@ import org.scalatest.matchers.should.Matchers
 class SetOperationsTest extends AnyFlatSpec with Matchers {
   behavior of "DSL for Set Operation "
   it should "result in creating a set if set not already present" in {
-    assert(Variable("A").eval() == None)
     Insert(Variable("A") , List(Value("set"), Value("34"), Value(1234))).eval()
     val b = collection.mutable.HashSet("set", "34", 1234)
     assert(Variable("A").eval() == b)
