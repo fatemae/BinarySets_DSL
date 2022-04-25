@@ -5,6 +5,7 @@ import org.scalatest.matchers.should.Matchers
 class PartialEvalOptimizationTest extends AnyFlatSpec with Matchers {
   behavior of "DSL with Partial Evaluation and Optimization "
   Insert(Variable("PevalA") , List(Value("setA"), Value("100"))).eval()
+
   it should "result in partial Evaluation of Union Operation" in {
     val op = Union(Variable("PevalA"),Variable("PevalB")).eval()
     assert(op == Union(Value(Set("setA", "100")), Variable("PevalB")))
@@ -25,6 +26,27 @@ class PartialEvalOptimizationTest extends AnyFlatSpec with Matchers {
 
   }
 
+  it should "result in applying OptimizedUnion Function on a SetExpression" in {
+    val x = OptimizedUnion(Union(Variable("varA"), Variable("varA"))).eval()
+    assert(x == Variable("varA"))
+  }
+
+  it should "result in applying OptimizedIntersection Function on a SetExpression" in {
+    val x = OptimizedIntersection(Intersection(Variable("varA"), Variable("varA"))).eval()
+    assert(x == Variable("varA"))
+  }
+
+  it should "result in applying OptimizedDifference Function on a SetExpression" in {
+    val x = OptimizedDifference(Difference(Variable("varA"), Variable("varA"))).eval()
+    assert(x == Set())
+  }
+
+  it should "result in applying OptimizedCProduct Function on a SetExpression" in {
+    val x = OptimizedCProduct(Cartesian_Product(Variable("varA"), Value(Set()))).eval()
+    assert(x == Set())
+  }
+
+
   it should "result in applying OptimizedUnion Function on a container of SetExpression" in {
     val x = ExpressionContainer(List(Union(Variable("varA"), Variable("varA")),
       Union(Variable("varA"), Value(Set())),
@@ -35,7 +57,7 @@ class PartialEvalOptimizationTest extends AnyFlatSpec with Matchers {
         Union(Variable("varA"),Variable("varB")))))
   }
 
-  it should "result in applying OptimizedIntersection Function on a container of SetExpression" in {
+  it should "result in applying OptimizedIntersection Function on a container of SetExpression using map" in {
     val x = ExpressionContainer(List(Intersection(Variable("varA"), Variable("varA")),
       Intersection(Variable("varA"), Value(Set())),
       Intersection(Value(Set()), Variable("varA")),
@@ -45,7 +67,7 @@ class PartialEvalOptimizationTest extends AnyFlatSpec with Matchers {
         Intersection(Variable("varA"),Variable("varB")))))
   }
 
-  it should "result in applying OptimizedDifference Function on a container of SetExpression" in {
+  it should "result in applying OptimizedDifference Function on a container of SetExpression using map" in {
     val x = ExpressionContainer(List(Difference(Variable("varA"), Variable("varA")),
       Difference(Variable("varA"), Value(Set())),
       Difference(Value(Set()), Variable("varA")),
@@ -55,7 +77,7 @@ class PartialEvalOptimizationTest extends AnyFlatSpec with Matchers {
         Difference(Variable("varA"),Variable("varB")))))
   }
 
-  it should "result in applying Optimized Cartesian Product Function on a container of SetExpression" in {
+  it should "result in applying Optimized Cartesian Product Function on a container of SetExpression using map" in {
     val x = ExpressionContainer(List(Cartesian_Product(Variable("varA"), Variable("varA")),
       Cartesian_Product(Variable("varA"), Value(Set())),
       Cartesian_Product(Value(Set()), Variable("varA")),

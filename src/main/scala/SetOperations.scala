@@ -517,7 +517,7 @@ object SetOperations:
           objectMap.getOrElse(s, null) match {
             case objects: mutable.Map[String, Any] => objects.getOrElse(objectName, null) match {
               case objectDetails: mutable.Map[String, Any] => objectDetails.getOrElse(field, null) match {
-                case fields: mutable.Map[String, Any] => 
+                case fields: mutable.Map[String, Any] =>
                   println(fieldName + ": " + fields.getOrElse(fieldName, null))
                 case _ => throw Exception("Object do not have fields")
               }
