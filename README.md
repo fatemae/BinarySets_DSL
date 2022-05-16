@@ -1,8 +1,8 @@
-# BinarySetsDSL-(Classes+Abstraction+Inheritence+scoping+controlStructure+ExceptionHandling)-CS474
+# BinarySetsDSL - with Classes, Abstraction, Inheritence ,Scoping ,ControlStructure ,ExceptionHandling, Partial Evaluation, Partial Functions
 Fatema Engineeringwala - 675589901
 
 ## Brief Project Description
-A language for users of Set Theory to create and evaluate binary operations on sets along with classes, abstract classes , interfaces and its inheritance. This language also includes if-then-else control structure and exception handling where user can throw an exception and handle it in try-catch block. 
+A language for users of Set Theory to create and evaluate binary operations on sets along with classes, abstract classes , interfaces and its inheritance ,if-then-else control structure and exception handling where user can throw an exception and handle it in try-catch block. This DSL also includes Partial Evaluation, Monadic Map Function and Optimization of Set Operations. 
 
 ## Instructions on Running Code
 `sbt compile` used to compile the code<br>
@@ -27,6 +27,10 @@ A language for users of Set Theory to create and evaluate binary operations on s
 15. Implemented If control structure
 16. Implemented Throws to throw an exception
 17. Implemented try-multi-catch block for exception handling
+18. Included support for Partial Evaluation in SetExpressions
+19. Implemented Monadic Function Map 
+20. ExpressionContainer which represents a list of SetOper
+21. Optimizing Transformer Functions
 
 
 ## Classes and Inheritance datatypes
@@ -79,7 +83,8 @@ A language for users of Set Theory to create and evaluate binary operations on s
 
 
 ## Binary Set Expressions
-Always call eval function on the expression to run it<br>
+Always call eval function on the expression to run it<br><br>
+**Expressions**<br>
 1. Value<br>
    Used to define a value. Takes one parameter of Any type and returns the same. <br>
    `Value("somestring").eval()` return the string value somestring 
@@ -167,3 +172,30 @@ Always call eval function on the expression to run it<br>
 21. TryCatch<br>
     Implements the try-catch block. The first parameter is a list of setOper that will be the try code block followed by a list of catchException to represent try-multi-catch.<br>
     `TryCatch(codeBlock: List[SetOper], catchExceptions: List[CatchException])`
+
+22. ExpressionContainer<br>
+    This is a container used to represent a list of SetOperations. It takes in One parameter which is a list of SetOper type.<br>
+    `ExpressionContainer(List(Union(Variable("varA"), Variable("varA")), Union(Variable("varA"), Value(Set())))`
+
+23. OptimizedUnion<br>
+    This is an optimizing transformer function that optimizes the Partial Union Evaluation. It takes in Union SetOper and returns the result of union by optimizing the operation.<br>
+    `OptimizedUnion(Union(Variable("A"), Variable("B")))`
+
+24. OptimizedIntersection<br>
+    This is an optimizing transformer function that optimizes the Partial Intersection Evaluation. It takes in Intersection SetOper and returns the result of intersection by optimizing the operation.<br>
+    `OptimizedIntersection(Intersection(Variable("A"), Variable("B")))`
+
+25. OptimizedDifference<br>
+    This is an optimizing transformer function that optimizes the Partial Difference Evaluation. It takes in Difference SetOper and returns the result of difference by optimizing the operation.<br>
+    `OptimizedDifference(Difference(Variable("A"), Variable("B")))`
+
+26. OptimizedCProduct<br>
+    This is an optimizing transformer function that optimizes the Partial CrossProduct Evaluation. It takes in CrossProduct SetOper and returns the result of CrossProduct by optimizing the operation.<br>
+    `OptimizedCProduct(Cross_product(Variable("A"), Variable("B")))`
+
+**Functions**<br>
+1. eval<br>
+    This function is used to evaluation our SetDSL Expressions and return a partially evaluation SetExpressions or Any type of data.<br>
+
+2. map<br>
+    This is a monadic function which takes in an optimizing transformer function and applies this function to a container of SetOperations and returns the result of this optimizations as a container of SetOperations.<br>

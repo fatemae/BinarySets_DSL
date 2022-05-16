@@ -26,10 +26,14 @@ object SetOperations:
     case Insert(setname: Variable, objectList: List[SetOper])
     case Delete(setName: Variable, obj: SetOper)
     case Check(setName: Variable, obj: SetOper)
+    case OptimizedUnion(oper: SetOper)
     case Union(setA: SetOper, setB: SetOper)
+    case OptimizedIntersection(oper: SetOper)
     case Intersection(setA: SetOper, setB: SetOper)
+    case OptimizedDifference(oper: SetOper)
     case Difference(setA: SetOper, setB: SetOper)
     case Symm_Difference(setA: SetOper, setB: SetOper)
+    case OptimizedCProduct(oper: SetOper)
     case Cartesian_Product(setA: SetOper, setB: SetOper)
     case NewObject(staticType:String, dynamicType:String, variable: Variable, params: Parameters)
     case InvokeMethod(variable: ObjectType, mName: String, params: Parameters)
@@ -41,6 +45,7 @@ object SetOperations:
     case TryCatch(codeBlock: List[SetOper], catchException: List[CatchException])
     case ThrowException(className: String, variable: ObjectType)
     case PrintField(field: String)
+    case ExpressionContainer(setOper: List[SetOper])
 
     private def findInScope(scopeName: String, objectName: String, methodName: String, variableName: String): Any = {
       val scopeList = scopeName.split('+').toList
@@ -50,8 +55,10 @@ object SetOperations:
             case None =>
             case map: mutable.Map[String, Any] => map.getOrElse(field, None) match {
               case None =>
-              case fields: mutable.Map[String, Any] => if(fields.getOrElse(variableName, None) !=None)
-                return fields.getOrElse(variableName, None)
+              case fields: mutable.Map[String, Any] =>
+                val temp = fields.getOrElse(variableName, None)
+                if(temp!=None)
+                  return temp
             }
           }
         }
@@ -59,20 +66,20 @@ object SetOperations:
         val l = scopeList.last
         if(methodName!=null){
           objectMap.getOrElse(l, None) match{
-            case None =>
+            case None => return None
             case map: mutable.Map[String, Any] => map.getOrElse(objectName, None) match {
               case objectDetails: mutable.Map[String, Any] => objectDetails.getOrElse(method, None) match {
                 case methods: mutable.Map[String, Any] => methods.getOrElse(methodName, None) match {
                   case methodDetails: mutable.Map[String, Any] => methodDetails.getOrElse(methodParams, None) match {
                     case params: mutable.Map[String, Any] => if(params.getOrElse(variableName, None) !=None)
                       return params.getOrElse(variableName, None)
-                    case None =>
+                    case None => return None
                   }
-                  case None =>
+                  case None => return None
                 }
-                case None =>
+                case None => return None
               }
-              case None =>
+              case None => return None
             }
           }
         }
@@ -184,7 +191,7 @@ object SetOperations:
                     case params: mutable.Map[String, Any] =>
                       if(params.getOrElse(variableName, None)==None)
                         inObjectScope = checkVariableInObjectFields(scopeName, objectName, methodName, variableName, obj, false)
-                        println("inObjectScope:"+inObjectScope)
+//                        println("inObjectScope:"+inObjectScope)
                         if(!inObjectScope) {
                           params(variableName) = obj
                           return
@@ -214,7 +221,25 @@ object SetOperations:
       }
     }
 
-    def eval(scopeName: String = scopeVariable, objectName: String=null, methodName: String = null): Any = {
+    def map(f: SetOper => SetOper) : SetOper = {
+      val res =
+        this match {
+          case expC :ExpressionContainer => this.eval() match {
+            case ls: List[SetOper] => ls.foldRight(List.empty[SetOper])((x: SetOper, res: List[SetOper])=>
+              val r = f(x).eval() match {
+                case op: SetOper => op
+                case v: Set[Any] => Value(v)
+                case _ => Value("")
+              }
+              r :: res)
+            case _ => Nil
+          }
+          case _ => Nil
+        }
+      ExpressionContainer(res)
+    }
+
+    def eval(scopeName: String = scopeVariable, objectName: String=null, methodName: String = null): SetOper|Any = {
 //      bindingScope(scopeVariable)=None
       this match {
         //        To get any basic value types
@@ -222,7 +247,10 @@ object SetOperations:
 
         //        To return variables value
         case Variable(name) =>
-          findInScope(scopeName, objectName, methodName, name)
+          val x = findInScope(scopeName, objectName, methodName, name)
+          if(x==None)
+            Variable(name)
+          else x
 
         case Assign(variable, value) =>
           storeVariable(scopeName, objectName, methodName, variable, value.eval(scopeName, objectName, methodName))
@@ -231,9 +259,9 @@ object SetOperations:
         case Insert(setname, objectList) =>
           setname match {
             case Variable(name) =>
-              println("Inserting:" + name)
+//              println("Inserting:" + name)
               setname.eval(scopeName, objectName, methodName) match {
-                case None =>
+                case Variable(name) =>
                   val setObj: mutable.Set[Any] = mutable.Set[Any]()
                   for (obj <- objectList) {
                     setObj += obj.eval(scopeName, objectName, methodName)
@@ -250,10 +278,10 @@ object SetOperations:
 
         //        Deletes an object from a set
         case Delete(setname: Variable, obj: SetOper) =>
-          println("Deleting")
+//          println("Deleting")
           setname match {
             case Variable(name) => setname.eval(scopeName, objectName, methodName) match {
-              case None => "No Such set variable defined"
+              case Variable(name) => Delete(setname, obj)
               case setObj: mutable.Set[Any] =>
                 setObj -= obj.eval(scopeName, objectName, methodName)
                 storeVariable(scopeName, objectName, methodName, name, setObj)
@@ -263,12 +291,13 @@ object SetOperations:
           }
 
         //          Checks if a object is present in a set
-        case Check(setname, obj) => println("Check")
+        case Check(setname, obj) =>
+//          println("Check")
           setname match {
             case Variable(name) => setname.eval(scopeName, objectName, methodName) match {
-              case None => throw Exception("No Such set variable defined")
+              case Variable(nm) => Check(setname, obj)
               case setObj: mutable.Set[Any] =>
-                println("Check returns :" + setObj.contains(obj.eval(scopeName, objectName, methodName)))
+//                println("Check returns :" + setObj.contains(obj.eval(scopeName, objectName, methodName)))
                 setObj.contains(obj.eval(scopeName, objectName, methodName))
               case _ => throw Exception("Not a set type")
             }
@@ -276,12 +305,20 @@ object SetOperations:
           }
 
         //        returns a union of two sets
-        case Union(setA, setB) => println("Union")
+        case Union(setA, setB) =>
+//          println("Union")
           setA.eval(scopeName, objectName, methodName) match {
-            case None => setB.eval(scopeName, objectName, methodName)
+            case op :SetOper =>
+              setB.eval(scopeName, objectName, methodName) match {
+                case opB: SetOper => Union(op, opB)
+                case setObjB: mutable.Set[Any] =>
+                  Union(op, Value(setObjB))
+                case _ => throw Exception("B is not of Set type.")
+              }
             case setObjA: mutable.Set[Any] =>
               setB.eval(scopeName, objectName, methodName) match {
-                case None => setA.eval(scopeName, objectName, methodName)
+                case opB: SetOper =>
+                  Union(Value(setObjA),opB)
                 case setObjB: mutable.Set[Any] =>
                   setObjA.union(setObjB)
                 case _ => throw Exception("B is not of Set type.")
@@ -289,13 +326,32 @@ object SetOperations:
             case _ => throw Exception("A is not of Set type.")
           }
 
+        case OptimizedUnion(oper: SetOper) =>
+          oper match {
+            case Union(setA, setB) =>
+              val x = setA.eval(scopeName, objectName, methodName)
+              val y = setB.eval(scopeName, objectName, methodName)
+              if(x==y) x
+              else if(x==null || x==Nil || x.equals(Nil) || x.equals(Set.empty)) y
+              else if(y==null || y==Nil || y.equals(Nil) || y.equals(Set.empty)) x
+              else oper.eval(scopeName, objectName, methodName)
+            case _ =>
+          }
+
         //        returns intersection of two sets
-        case Intersection(setA, setB) => println("Intersection")
+        case Intersection(setA, setB) =>
+//          println("Intersection")
           setA.eval(scopeName, objectName, methodName) match {
-            case None => Set.empty
+            case op: SetOper =>
+              setB.eval(scopeName, objectName, methodName) match {
+                case opB: SetOper => Intersection(op , opB)
+                case setObjB: mutable.Set[Any] =>
+                  Intersection(op, Value(setObjB))
+                case _ => throw Exception("B is not of Set type.")
+              }
             case setObjA: mutable.Set[Any] =>
               setB.eval(scopeName, objectName, methodName) match {
-                case None => Set.empty
+                case opB: SetOper => Intersection(Value(setObjA), opB)
                 case setObjB: mutable.Set[Any] =>
                   setObjA.intersect(setObjB)
                 case _ => throw Exception("B is not of Set type.")
@@ -303,13 +359,31 @@ object SetOperations:
             case _ => throw Exception("A is not of Set type.")
           }
 
+        case OptimizedIntersection(oper: SetOper) =>
+          oper match {
+            case Intersection(setA, setB) =>
+              val x = setA.eval(scopeName, objectName, methodName)
+              val y = setB.eval(scopeName, objectName, methodName)
+              if(x==y) x
+              else if(x==null || x==Nil || x.equals(Nil) || x.equals(Set.empty)) Set.empty
+              else if(y==null || y==Nil || y.equals(Nil) || y.equals(Set.empty)) Set.empty
+              else oper.eval(scopeName, objectName, methodName)
+            case _ =>
+          }
+
         //        returns a difference of two sets
-        case Difference(setA, setB) => println("Difference")
+        case Difference(setA, setB) =>
+//          println("Difference")
           setA.eval(scopeName, objectName, methodName) match {
-            case None => setB.eval(scopeName, objectName, methodName)
+            case opA: SetOper => setB.eval(scopeName, objectName, methodName) match {
+              case opB: SetOper => Difference(opA, opB)
+              case setObjB: mutable.Set[Any] =>
+                Difference(opA, Value(setObjB))
+              case _ => throw Exception("B is not of Set type.")
+            }
             case setObjA: mutable.Set[Any] =>
               setB.eval(scopeName, objectName, methodName) match {
-                case None => setA.eval(scopeName, objectName, methodName)
+                case opB : SetOper => Difference(Value(setObjA), opB)
                 case setObjB: mutable.Set[Any] =>
                   setObjA.diff(setObjB)
                 case _ => throw Exception("B is not of Set type.")
@@ -317,19 +391,39 @@ object SetOperations:
             case _ => throw Exception("A is not of Set type.")
           }
 
+        case OptimizedDifference(oper: SetOper) =>
+          oper match {
+            case Difference(setA, setB) =>
+              val x = setA.eval(scopeName, objectName, methodName)
+              val y = setB.eval(scopeName, objectName, methodName)
+              if(x==y) Set.empty
+              else if(x==null || x==Nil || x.equals(Nil) || x.equals(Set.empty)) y
+              else if(y==null || y==Nil || y.equals(Nil) || y.equals(Set.empty)) x
+              else oper.eval(scopeName, objectName, methodName)
+            case _ =>
+          }
+
         //        returns symmetric difference of two sets
-        case Symm_Difference(setA, setB) => println("Symmetric Difference")
+        case Symm_Difference(setA, setB) =>
+//          println("Symmetric Difference")
           val diff1 = Difference(setA, setB)
           val diff2 = Difference(setB, setA)
           Union(diff1, diff2).eval(scopeName, objectName, methodName)
 
         //        returns Cartesian Product of two sets
-        case Cartesian_Product(setA, setB) => println("Cartesian Product")
+        case Cartesian_Product(setA, setB) =>
+//          println("Cartesian Product")
           setA.eval(scopeName, objectName, methodName) match {
-            case None => setB.eval(scopeName, objectName, methodName)
+            case opA:SetOper => setB.eval(scopeName, objectName, methodName) match {
+              case opB: SetOper => Cartesian_Product(opA, opB)
+              case setObjB: mutable.Set[Any] =>
+                Cartesian_Product(opA, Value(setObjB))
+              case null => throw Exception("B is not of Set type.")
+            }
             case setObjA: mutable.Set[Any] =>
               setB.eval(scopeName, objectName, methodName) match {
-                case None => setA.eval(scopeName, objectName, methodName)
+                case opB: SetOper => Cartesian_Product(Value(setObjA), opB)
+                case Nil => Set.empty
                 case setObjB: mutable.Set[Any] =>
                   val cross = for {
                     x <- setObjA; y <- setObjB
@@ -340,12 +434,25 @@ object SetOperations:
             case null => throw Exception("A is not of Set type.")
           }
 
+        case OptimizedCProduct(oper: SetOper) =>
+          oper match {
+            case Cartesian_Product(setA, setB) =>
+              val x = setA.eval(scopeName, objectName, methodName)
+              val y = setB.eval(scopeName, objectName, methodName)
+              if(x==null || x==Nil || x.equals(Nil) || x.equals(Set.empty)) Set.empty
+              else if(y==null || y==Nil || y.equals(Nil) || y.equals(Set.empty)) Set.empty
+              else oper.eval(scopeName, objectName, methodName)
+            case _ =>
+          }
+
         //        creates a named operation
-        case Macro(name, operation, isAbstract) => println("Macro")
+        case Macro(name, operation, isAbstract) =>
+//          println("Macro")
           storeMacro(scopeName, name, isAbstract, operation)
 
         //        Evaluates a Macro
-        case MacroEval(name) => println("Substituting Macro")
+        case MacroEval(name) =>
+//          println("Substituting Macro")
           val seq: Seq[SetOper] = findMacroInScope(scopeName, name)
           if seq != null then
             for (x <- seq) {
@@ -354,7 +461,8 @@ object SetOperations:
           else seq
 
         //        Case to run scope
-        case Scope(sName, oper) => println("Scope:" + sName)
+        case Scope(sName, oper) =>
+//          println("Scope:" + sName)
           val map = bindingScope.getOrElse(sName, None)
           map match {
             case None => bindingScope(sName) = mutable.Map[String, Any]()
@@ -363,7 +471,7 @@ object SetOperations:
           oper.eval(scopeName + connector + sName)
 
         case NewObject(staticType: String, dynamicType: String, variable: Variable, params: Parameters) =>
-          println("NewObject")
+//          println("NewObject")
           val scopeNm = scopeName.split(connector.charAt(0)).toList.last
           val classType = ClassOperations.getClassInfo(dynamicType, typeModifier)
           if (bindingScope.getOrElse(staticType, None) == None || bindingScope.getOrElse(dynamicType, None) == None)
@@ -391,7 +499,7 @@ object SetOperations:
           }
 
         case InvokeMethod(variable: ObjectType, mName: String, params: Parameters) =>
-          println("InvokeMethod")
+//          println("InvokeMethod")
           val scopeNm = scopeName.split(connector.charAt(0)).toList.last
           //          println(variable)
           variable match {
@@ -409,7 +517,8 @@ object SetOperations:
           objectMap.getOrElse(s, null) match {
             case objects: mutable.Map[String, Any] => objects.getOrElse(objectName, null) match {
               case objectDetails: mutable.Map[String, Any] => objectDetails.getOrElse(field, null) match {
-                case fields: mutable.Map[String, Any] => println(fieldName + ": " + fields.getOrElse(fieldName, null))
+                case fields: mutable.Map[String, Any] =>
+                  println(fieldName + ": " + fields.getOrElse(fieldName, null))
                 case _ => throw Exception("Object do not have fields")
               }
               case _ => throw Exception("no such object in scope")
@@ -419,9 +528,10 @@ object SetOperations:
 
         case IfThenElse(cond: Check, thenCase: List[SetOper], elseCase: List[SetOper]) =>
           cond.eval(scopeName, objectName, methodName) match {
+            case op: Check => IfThenElse(op, thenCase, elseCase)
             case c: Boolean => if (c) {
               val x = checkForException(thenCase, scopeName, objectName, methodName)
-              println(x)
+//              println(x)
             } else {
               checkForException(elseCase, scopeName, objectName, methodName)
             }
@@ -438,11 +548,11 @@ object SetOperations:
           }
 
         case ThrowException(className: String, variable: ObjectType) =>
-          println("Throw Exception")
+//          println("Throw Exception")
           mutable.Map[String, Any]("class" -> className, "object" -> variable)
 
         case TryCatch(codeBlock: List[SetOper], catchExceptions: List[CatchException]) =>
-          println("TryCatch")
+//          println("TryCatch")
           var exceptionCaught = false
           val x = checkForException(codeBlock, scopeName, objectName, methodName)
           if (x.size() > 0) {
@@ -469,6 +579,11 @@ object SetOperations:
             if(!exceptionCaught)
               throw Error("Uncaught Exception")
           }
+
+        case ExpressionContainer(list: List[SetOper]) =>
+          list
+
+
       }
 
     }

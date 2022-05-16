@@ -1,4 +1,5 @@
-
+import CONSTANTS.*
+import SetOperations._
 
 object SetImpl:
   @main def runSetExp(): Unit =
@@ -84,30 +85,71 @@ object SetImpl:
 //            List(Insert(Variable("someSet"), List(Value(10)))), List(Insert(Variable("someSet"), List(Value(15)))))).eval()
 //          println(SetOperations.bindingScope)
 
-    ExceptionClassDef("someExceptonClassName", Field("Reason"),
-      Constructor(Parameters(collection.mutable.Map("r"->null)), Assign("Reason", Variable("r"))),
-      Method("printReason", Parameters(null), PrintField("Reason"))).eval()
-    ExceptionClassDef("someExceptonClassName1", Field("Reason"),
-      Constructor(Parameters(collection.mutable.Map("r"->null)), Assign("Reason", Variable("r"))),
-      Method("printReason", Parameters(null), PrintField("Reason"))).eval()
-    //this example shows how users use branching and exception constructs
-    Scope("scopenamemulticatch", TryCatch(
-      List(
-        Insert(Variable("someSet"), List(Value("var"), Value(1), Value("somestring"))),
-        IfThenElse(Check(Variable("someSet"), Value(1)),
-          List(
-            NewObject("someExceptonClassName", "someExceptonClassName", Variable("e"),
-              Parameters(collection.mutable.Map("r"->"No value found"))),
-            NewObject("someExceptonClassName1", "someExceptonClassName1", Variable("a"),
-              Parameters(collection.mutable.Map("r"->"No value found"))),
-            ThrowException("someExceptonClassName", ObjectType("e")),
-            Insert(Variable("var1"), List(Value(1)))),
-          List(Insert(Variable("var2"), List(Value(3))))),
-        Insert(Variable("var3"), List(Value(3)))),
-      //and this parameter is the catch code block
-      //the variable "storageOfException" is bound to the exception class someExceptonClassName
-      //and the value of its field, Reason is retrieved and stored in a set bound to the variable var.
-      List(CatchException(ObjectType("a"), Insert(Variable("var4"), List(Value(3)))),
-        CatchException(ObjectType("e"), Insert(Variable("var5"), List(Value(3))))))).eval()
+
+
+
+
+
+//    val x = ExpressionContainer(List(Union(Variable("A"), Variable("A")),
+//      Union(Variable("A"), Value(Set())),
+//      Union(Value(Set()), Variable("A")),
+//      Union(Variable("A"), Variable("B")))).map(OptimizedUnion)
+//    println(x)
+//    val y = ExpressionContainer(List(Intersection(Variable("A"), Variable("A")), Intersection(Variable("A"), Value(Set())),
+//      Intersection(Value(Set()), Variable("A")), Intersection(Variable("A"), Variable("B")))).map(OptimizedIntersection)
+//    println(y)
+//
+    val z = ExpressionContainer(List(Difference(Variable("A"), Variable("A")), Difference(Variable("A"), Value(Set())),
+      Difference(Value(Set()), Variable("A")), Difference(Variable("A"), Variable("B")))).map(OptimizedDifference)
+    println(z)
+//
+    val p = ExpressionContainer(List(Cartesian_Product(Variable("A"), Variable("A")), Cartesian_Product(Variable("A"), Value(Set())),
+      Cartesian_Product(Value(Set()), Variable("A")), Cartesian_Product(Variable("A"), Variable("B")))).map(OptimizedCProduct)
+    println(p)
+
+//    val list = List(Set(1,2,3), Set(1,8,9), Set(4,5,6))
+//    list.map()
+//    Insert(Variable("A") , List()).eval()
+//    val x = Check(Variable("B"), Variable("set")).eval()
+//    Insert(Variable("B") , List(Variable("new set"), Value(true), Value(100))).eval()
+//    val op = Union(Variable("A"),Variable("B")).eval()
+//    println(op)
+//    Insert(Variable("A") , List(Variable("set"), Value("34"), Value(100))).eval()
+//    println(op.asInstanceOf[SetOperations.SetOper].eval())
+//    println(x)
+//    println(bindingScope)
+//    bindingScope.getOrElse(scopeVariable, null).getOrElse(field, null) match {
+//      case map: collection.mutable.Map[String, Any] => map.getOrElse("A", null) match {
+//        case mp: collection.mutable.HashSet[ Any] => mp.foreach(e => println(e.isInstanceOf[SetOper]))
+//        case null =>
+//      }
+//      case null =>
+//    }
+
+//    ExceptionClassDef("someExceptonClassName", Field("Reason"),
+//      Constructor(Parameters(collection.mutable.Map("r"->null)), Assign("Reason", Variable("r"))),
+//      Method("printReason", Parameters(null), PrintField("Reason"))).eval()
+//    ExceptionClassDef("someExceptonClassName1", Field("Reason"),
+//      Constructor(Parameters(collection.mutable.Map("r"->null)), Assign("Reason", Variable("r"))),
+//      Method("printReason", Parameters(null), PrintField("Reason"))).eval()
+//    //this example shows how users use branching and exception constructs
+//    Scope("scopenamemulticatch", TryCatch(
+//      List(
+//        Insert(Variable("someSet"), List(Value("var"), Value(1), Value("somestring"))),
+//        IfThenElse(Check(Variable("someSet"), Value(1)),
+//          List(
+//            NewObject("someExceptonClassName", "someExceptonClassName", Variable("e"),
+//              Parameters(collection.mutable.Map("r"->"No value found"))),
+//            NewObject("someExceptonClassName1", "someExceptonClassName1", Variable("a"),
+//              Parameters(collection.mutable.Map("r"->"No value found"))),
+//            ThrowException("someExceptonClassName", ObjectType("e")),
+//            Insert(Variable("var1"), List(Value(1)))),
+//          List(Insert(Variable("var2"), List(Value(3))))),
+//        Insert(Variable("var3"), List(Value(3)))),
+//      //and this parameter is the catch code block
+//      //the variable "storageOfException" is bound to the exception class someExceptonClassName
+//      //and the value of its field, Reason is retrieved and stored in a set bound to the variable var.
+//      List(CatchException(ObjectType("a"), Insert(Variable("var4"), List(Value(3)))),
+//        CatchException(ObjectType("e"), Insert(Variable("var5"), List(Value(3))))))).eval()
 
 

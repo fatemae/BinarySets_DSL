@@ -26,9 +26,6 @@ object ClassOperations :
     }
   }
 
-
-  //    case CatchException()
-
   private def combineMaps(newParams: Parameters, orignalParams: mutable.Map[String, Any]): mutable.Map[String, Any] = {
     newParams match {
       case Parameters(p : mutable.Map[String, Any]) =>
@@ -527,8 +524,6 @@ object ClassOperations :
                     if (!classNm.equals(name) && checkCircularComposition(name, classNm)) {
                       val hasAbstractMethods = checkForAbstractMethods(classNm, name, parentClass)
                       if (getClassInfo(classNm, typeModifier) == null && !hasAbstractMethods) {
-//                        println("esrdtfygbuh" + hasAbstractMethods)
-
                         bindingScope.remove(classNm)
                         throw Exception("Doesnot Implement abstract methods of parent class")
                       } else {
@@ -571,7 +566,7 @@ object ClassOperations :
           }else{
             throw Exception("Cannot extend more than one class/interface")
           }
-//          println(bindingScope)
+
 
         case Field(fName: String) =>
           Insert(Variable(fName), collection.immutable.List[SetOper]()).eval(className)
@@ -605,8 +600,6 @@ object ClassOperations :
           }else{
             throw Exception("Interface cannot have Concrete Methods.")
           }
-
-
 
         case AbstractClassDef(cName: String, classOper: _*) =>
           defineClass(cName, abstractType, className+connector+cName, classOper)
