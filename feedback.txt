@@ -1,12 +1,14 @@
 Grading
 --------------------------------------
-Maximum grade for this homework is 10%.
 
-1. only some basic expression language is implemented
-Marks deducted: 0%
+
+Maximum grade for this homework is 10%. 
+
+1. Only some basic expression language is implemented without scopes and assignments and macros and nothing else is done.
+Marks deducted: 0% 
 
 2. For each use of var instead of val:
-Number of `var` used: 0
+Number of `var` used: 0 
 Marks deducted: 0%
 
 3. for each non-spelling-related problem reported by the IntelliJ code analysis and inspection tool 0.2% will be substracted from the maximum grade
@@ -33,3 +35,4 @@ Marks deducted: 0%
 Comments: N/A
 
 Marks for Homework 4: 10%
+
