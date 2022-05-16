@@ -63,7 +63,7 @@ class InterfaceAndAbstractClassTests extends AnyFlatSpec with Matchers{
     AbstractClassDef("C", AbstractMethod("method3", Parameters(null)), Method("method2", Parameters(null), null), EXTENDS("B")).eval()
     ClassDef("D", Method("method3", Parameters(null), Insert(Variable("x"), List(Value(3)))), EXTENDS("C")).eval()
     val op = NewObject("D", "D", Variable("obj"), Parameters(null)).eval()
-    assert(Object("obj").eval()!=null)
+    assert(ObjectType("obj").eval()!=null)
   }
 
   it should "should result in Exception if class extends more than one class" in {
@@ -79,16 +79,16 @@ class InterfaceAndAbstractClassTests extends AnyFlatSpec with Matchers{
 
   it should "should result in object creation if dynamic and static Type are in inheritance hierarchy" in {
     val op = NewObject("A", "D", Variable("obj1"), Parameters(null)).eval()
-    assert(Object("obj1").eval()!=null)
+    assert(ObjectType("obj1").eval()!=null)
   }
 
   it should "will return null if methods other than that of objects static type are called" in {
-    val op = InvokeMethod(Object("obj1"), "method2", Parameters(null))
+    val op = InvokeMethod(ObjectType("obj1"), "method2", Parameters(null))
     assert(null == op.eval())
   }
 
   it should "should invoke appropriate methods using dynamic dispatch" in {
-    val op = InvokeMethod(Object("obj1"), "method1", Parameters(null))
+    val op = InvokeMethod(ObjectType("obj1"), "method1", Parameters(null))
     assert(() == op.eval())
   }
 
@@ -139,7 +139,7 @@ class InterfaceAndAbstractClassTests extends AnyFlatSpec with Matchers{
 
   it should "should result in creation of an object of a class, with with the implementation of parent interface methods" in {
     val op = NewObject("newIntr", "X", Variable("intrObj"), Parameters(null)).eval()
-    assert(Object("intrObj").eval()!=null)
+    assert(ObjectType("intrObj").eval()!=null)
   }
 
 
