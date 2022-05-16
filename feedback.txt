@@ -1,5 +1,6 @@
 Grading
 --------------------------------------
+
 Maximum grade for this homework is 10%. 
 
 1. Only some basic expression language is implemented without scopes and assignments and macros and nothing else is done.
@@ -25,14 +26,12 @@ Marks deducted: 0%
 Comments: N/A
 
 7. The program crashes without completing the core functionality or it is incorrect: up to 10% lost;
-Marks deducted: 2.5%
-Comments: Penalty for errors fixed after submission deadline.
+Marks deducted: 0%
+Comments: N/A
 
 8. Documentation exists but it is insufficient to understand how you assembled and deployed all language components: up to 8% lost;
 Marks deducted: 0%
 Comments: N/A
 
-Marks for Homework 1: 7.5%
+Marks for Homework 3: 10%
 
-Comments: 
-Build file error. not compilable with sbt clean compile run.
